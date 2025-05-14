@@ -4,19 +4,46 @@
     <title>InnerRadio Web Player</title>
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
     <style>
-      body { text-align: center; font-family: sans-serif; padding-top: 40px; }
-      button { font-size: 18px; padding: 12px 24px; margin-top: 20px; }
+      body {
+        background-color: #f4f4f4;
+        color: #111;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding-top: 50px;
+      }
+      h1 {
+        margin-bottom: 20px;
+      }
+      p {
+        font-size: 16px;
+        margin-bottom: 20px;
+      }
+      button {
+        background-color: #1DB954;
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        font-size: 18px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #1aa34a;
+      }
     </style>
   </head>
   <body>
     <h1>InnerRadio Web Player</h1>
-    <p>Tap the button below to activate audio:</p>
+    <p>Tap the button below to activate in-app playback:</p>
     <button onclick="initializePlayer()">Enable Playback</button>
 
     <script>
+      console.log('📡 player.html loaded');
+
       let player;
       async function initializePlayer() {
         const token = new URLSearchParams(window.location.search).get('token');
+        console.log('🎟️ Received token:', token?.slice(0, 8), '...');
 
         player = new Spotify.Player({
           name: 'InnerRadio Web Player',
@@ -28,7 +55,6 @@
           console.log('✅ Ready with Device ID', device_id);
 
           try {
-            // Transfer playback to this device
             await fetch('https://api.spotify.com/v1/me/player', {
               method: 'PUT',
               headers: {
@@ -40,7 +66,7 @@
                 play: false
               })
             });
-            console.log('🎯 Playback transferred to Web Player');
+            console.log('🎯 Playback transferred');
 
             await player.resume();
             console.log('🎧 Player resumed');
