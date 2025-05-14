@@ -3,15 +3,22 @@
   <head>
     <title>InnerRadio Web Player</title>
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <style>
+      body { text-align: center; font-family: sans-serif; padding-top: 40px; }
+      button { font-size: 18px; padding: 12px 24px; margin-top: 20px; }
+    </style>
   </head>
   <body>
     <h1>InnerRadio Web Player</h1>
-    <p>Initializing Spotify Player...</p>
+    <p>Tap the button below to activate audio:</p>
+    <button onclick="initializePlayer()">Enable Playback</button>
 
     <script>
-      window.onSpotifyWebPlaybackSDKReady = () => {
+      let player;
+      async function initializePlayer() {
         const token = new URLSearchParams(window.location.search).get('token');
-        const player = new Spotify.Player({
+
+        player = new Spotify.Player({
           name: 'InnerRadio Web Player',
           getOAuthToken: cb => cb(token),
           volume: 0.8
@@ -21,6 +28,7 @@
           console.log('✅ Ready with Device ID', device_id);
 
           try {
+            // Transfer playback to this device
             await fetch('https://api.spotify.com/v1/me/player', {
               method: 'PUT',
               headers: {
@@ -34,48 +42,22 @@
             });
             console.log('🎯 Playback transferred to Web Player');
 
-            // 🔊 Resume audio context
-            const context = Spotify.Player._options && Spotify.Player._options.audioContext;
-            if (context && context.state === 'suspended') {
-              await context.resume();
-              console.log('🔈 Audio context resumed');
-            }
-
-            // ▶️ Attempt to start the player
             await player.resume();
             console.log('🎧 Player resumed');
 
-            // ✅ Notify React Native app
             window.ReactNativeWebView?.postMessage(device_id);
           } catch (err) {
             console.error('❌ Playback setup failed:', err);
           }
         });
 
-        player.addListener('initialization_error', ({ message }) => {
-          console.error('init_error', message);
-        });
-
-        player.addListener('authentication_error', ({ message }) => {
-          console.error('auth_error', message);
-        });
-
-        player.addListener('account_error', ({ message }) => {
-          console.error('account_error', message);
-        });
-
-        player.addListener('playback_error', ({ message }) => {
-          console.error('playback_error', message);
-        });
+        player.addListener('initialization_error', ({ message }) => console.error('init_error', message));
+        player.addListener('authentication_error', ({ message }) => console.error('auth_error', message));
+        player.addListener('account_error', ({ message }) => console.error('account_error', message));
+        player.addListener('playback_error', ({ message }) => console.error('playback_error', message));
 
         player.connect();
-      };
-    </script>
-  </body>
-</html>
-
-        player.connect();
-      };
+      }
     </script>
   </body>
 </html>
