@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <title>InnerRadio Web Player</title>
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+  </head>
+  <body>
+    <h1>InnerRadio Web Player</h1>
+    <p>Initializing Spotify Player...</p>
+
+    <script>
+      window.onSpotifyWebPlaybackSDKReady = () => {
+        const token = new URLSearchParams(window.location.search).get('token');
+        const player = new Spotify.Player({
+          name: 'InnerRadio Web Player',
+          getOAuthToken: cb => cb(token),
+          volume: 0.8
+        });
+
+        player.addListener('ready', ({ device_id }) => {
+          console.log('✅ Ready with Device ID', device_id);
+          // Send device ID to the React Native app
+          window.ReactNativeWebView?.postMessage(device_id);
+        });
+
+        player.addListener('initialization_error', ({ message }) => {
+          console.error(message);
+        });
+
+        player.addListener('authentication_error', ({ message }) => {
+          console.error(message);
+        });
+
+        player.addListener('account_error', ({ message }) => {
+          console.error(message);
+        });
+
+        player.addListener('playback_error', ({ message }) => {
+          console.error(message);
+        });
+
+        player.connect();
+      };
+    </script>
+  </body>
+</html>
