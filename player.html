@@ -20,7 +20,6 @@
         player.addListener('ready', async ({ device_id }) => {
           console.log('✅ Ready with Device ID', device_id);
 
-          // Transfer playback to this device
           try {
             await fetch('https://api.spotify.com/v1/me/player', {
               method: 'PUT',
@@ -35,10 +34,21 @@
             });
             console.log('🎯 Playback transferred to Web Player');
 
-            // Now notify the React Native app
+            // 🔊 Resume audio context
+            const context = Spotify.Player._options && Spotify.Player._options.audioContext;
+            if (context && context.state === 'suspended') {
+              await context.resume();
+              console.log('🔈 Audio context resumed');
+            }
+
+            // ▶️ Attempt to start the player
+            await player.resume();
+            console.log('🎧 Player resumed');
+
+            // ✅ Notify React Native app
             window.ReactNativeWebView?.postMessage(device_id);
           } catch (err) {
-            console.error('❌ Transfer playback failed:', err);
+            console.error('❌ Playback setup failed:', err);
           }
         });
 
@@ -57,6 +67,12 @@
         player.addListener('playback_error', ({ message }) => {
           console.error('playback_error', message);
         });
+
+        player.connect();
+      };
+    </script>
+  </body>
+</html>
 
         player.connect();
       };
